@@ -1,10 +1,10 @@
+-- # -------- CREATE DATABASE ------------
+CREATE DATABASE database1;
+
 -- # -------- CREATE USER ------------
-CREATE USER 'webapp'@'%' IDENTIFIED BY 'abc123';
 GRANT ALL PRIVILEGES ON database1.* TO 'webapp'@'%';
 FLUSH PRIVILEGES;
 
--- # -------- CREATE DATABASE ------------
-CREATE DATABASE database1;
 USE database1;
 
 -- # -------- CREATE TABLES ------------
