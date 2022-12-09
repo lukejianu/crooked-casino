@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response, current_app
 import json
 from src import db
 
@@ -49,8 +49,28 @@ def update_portfolio(playerId):
     num10_to_add = request.headers["num_10"]
     num25_to_add = request.headers["num_25"]
     num100_to_add = request.headers["num_100"]
+    
     cursor.execute(
         f'''UPDATE Portfolio SET num_1 = num_1 + {num1_to_add}, num_5 = num_5 + {num5_to_add}, num_10 = num_10 + {num10_to_add}, num_25 = num_25 + {num25_to_add}, 
         num_100 = num_100 + {num100_to_add}, total_chips_value = num_1 + num_5 * 5 + num_10 * 10 + num_25 * 25 + num_100 * 100 WHERE playerId = {playerId};''')
     db.get_db().commit()
     return "success"
+
+# Dealer page: 
+
+
+# Get all dealers 
+@appsmith.route('/dealers', methods=['GET'])
+def get_dealers(): 
+    cursor = db.get_db().cursor()
+    cursor.execute('select firstName as label, dealerId as value from Dealer')
+    row_headers = [x[0] for x in cursor.description]
+    json_data = []
+    theData = cursor.fetchall()
+    for row in theData:
+        print(row[0])
+        json_data.append(dict(zip(row_headers, row)))
+    the_response = make_response(jsonify(json_data))
+    the_response.status_code = 200
+    the_response.mimetype = 'application/json'
+    return the_response
