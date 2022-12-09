@@ -6,6 +6,8 @@ from src import db
 customers = Blueprint('customers', __name__)
 
 # Get all customers from the DB
+
+
 @customers.route('/customers', methods=['GET'])
 def get_customers():
     cursor = db.get_db().cursor()
@@ -21,11 +23,45 @@ def get_customers():
     the_response.mimetype = 'application/json'
     return the_response
 
+
+@customers.route('/players', methods=['GET'])
+def get_players():
+    cursor = db.get_db().cursor()
+    cursor.execute('select firstName as label, playerId as value from Player')
+    row_headers = [x[0] for x in cursor.description]
+    json_data = []
+    theData = cursor.fetchall()
+    for row in theData:
+        json_data.append(dict(zip(row_headers, row)))
+    the_response = make_response(jsonify(json_data))
+    the_response.status_code = 200
+    the_response.mimetype = 'application/json'
+    return the_response
+
+
+@customers.route('/portfolio', methods=['GET'])
+def getPortfolio():
+    cursor = db.get_db().cursor()
+    playerId = request.headers["playerId"]
+    cursor.execute(
+        f'select total_chips_value from Player NATURAL JOIN Portfolio WHERE playerId = {playerId}')
+    row_headers = [x[0] for x in cursor.description]
+    json_data = []
+    theData = cursor.fetchall()
+    for row in theData:
+        json_data.append(dict(zip(row_headers, row)))
+    the_response = make_response(jsonify(json_data))
+    the_response.status_code = 200
+    the_response.mimetype = 'application/json'
+    return the_response
+
+
 # Get customer detail for customer with particular userID
 @customers.route('/customers/<userID>', methods=['GET'])
 def get_customer(userID):
     cursor = db.get_db().cursor()
-    cursor.execute('select * from customers where customerNumber = {0}'.format(userID))
+    cursor.execute(
+        'select * from customers where customerNumber = {0}'.format(userID))
     row_headers = [x[0] for x in cursor.description]
     json_data = []
     theData = cursor.fetchall()
