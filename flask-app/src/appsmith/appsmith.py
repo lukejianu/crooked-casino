@@ -77,7 +77,8 @@ def get_dealers():
 @appsmith.route('/players/<dealerId>', methods=['GET'])
 def get_players_at_table(dealerId):
     cursor = db.get_db().cursor()
-    cursor.execute(f'select * from Dealer NATURAL JOIN PokerTable NATURAL JOIN Player WHERE dealerId = {dealerId}')
+    cursor.execute(f'''SELECT P.playerId, P.firstName, P.lastName, P.netWorth, P.numDependents, P.frustrationLevel FROM (SELECT * FROM PokerTable NATURAL JOIN Dealer) N 
+    INNER JOIN Player P ON N.tableId=P.tableId WHERE dealerId={dealerId};''')
     row_headers = [x[0] for x in cursor.description]
     json_data = []
     theData = cursor.fetchall()
@@ -86,5 +87,18 @@ def get_players_at_table(dealerId):
     the_response = make_response(jsonify(json_data))
     the_response.status_code = 200
     the_response.mimetype = 'application/json'
-    print(the_response)
+    return the_response
+
+@appsmith.route('player/<playerId>', methods=['GET'])
+def get_player(playerId):
+    cursor = db.get_db().cursor()
+    cursor.execute(f'SELECT * FROM Player WHERE playerId={playerId}')
+    row_headers = [x[0] for x in cursor.description]
+    json_data = []
+    theData = cursor.fetchall()
+    for row in theData:
+        json_data.append(dict(zip(row_headers, row)))
+    the_response = make_response(jsonify(json_data))
+    the_response.status_code = 200
+    the_response.mimetype = 'application/json'
     return the_response
