@@ -28,9 +28,13 @@ def create_app():
     db.init_app(app)
 
     # Import the various routes
-    from src.appsmith.appsmith import appsmith
+    from src.admin.admin import admin
+    from src.dealer.dealer import dealer
+    from src.player.player import player
 
     # Register the routes that we just imported so they can be properly handled
-    app.register_blueprint(appsmith,    url_prefix='/app')
+    app.register_blueprint(admin,    url_prefix='/app')
+    app.register_blueprint(dealer,    url_prefix='/app')
+    app.register_blueprint(player,    url_prefix='/app')
 
     return app
