@@ -119,3 +119,14 @@ def get_avg_scumminess():
     the_response.mimetype = 'application/json'
     return the_response
 
+@admin.route('/remove-dealer', methods=['POST'])
+def remove_dealer():
+    """
+    Removes the dealer with the given dealerID (as a HTTP Request header).
+    """
+    cursor = db.get_db().cursor()
+    dealer_id_to_remove = request.headers["id_to_remove"]
+    query = f'DELETE FROM Dealer WHERE dealerId = {dealer_id_to_remove}'
+    cursor.execute(query)
+    db.get_db().commit()
+    return "success"
