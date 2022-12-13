@@ -41,7 +41,7 @@ def get_employees():
     dealer stats, namely, friendliness, corruptness and scumminess.
     """
     QUERY = """
-        SELECT d.dealerId, d.firstName, d.lastName, d.friendliness, d.corruptness, d.scumminess, A.role, A.firstName as Reports_To from Dealer d
+        SELECT A.firstName as Supervisor, A.role as Role, d.firstName, d.lastName, d.friendliness, d.corruptness, d.scumminess, dealerId from Dealer d
         JOIN PokerTable PT ON d.tableId = PT.tableId
         JOIN AdminTableBridge ATB ON PT.tableId = ATB.tableId
         JOIN Admin A ON ATB.adminId = A.adminId;
@@ -58,13 +58,10 @@ def get_employees():
     the_response.mimetype = 'application/json'
     return the_response
 
-@admin.route('/dealer-friendliness', methods=['GET'])
-def get_avg_friendliness():
-    """
-    Get the average friendliness across all dealers.
-    """
+@admin.route('/dealer-data', methods=['GET'])
+def get_dealer_data():
     QUERY = """
-        SELECT AVG(friendliness) as Avg_Friendliness FROM Dealer;
+        SELECT AVG(scumminess) scum, AVG(corruptness) corr, AVG(friendliness) friend FROM Dealer;
     """
     cursor = db.get_db().cursor()
     cursor.execute(QUERY)
@@ -78,55 +75,13 @@ def get_avg_friendliness():
     the_response.mimetype = 'application/json'
     return the_response
 
-
-@admin.route('/dealer-corruptness', methods=['GET'])
-def get_avg_corruptness():
-    """
-    Get the average corruptness across all dealers.
-    """
-    QUERY = """
-        SELECT AVG(corruptness) as Avg_Corruptness FROM Dealer;
-    """
-    cursor = db.get_db().cursor()
-    cursor.execute(QUERY)
-    row_headers = [x[0] for x in cursor.description]
-    json_data = []
-    theData = cursor.fetchall()
-    for row in theData:
-        json_data.append(dict(zip(row_headers, row)))
-    the_response = make_response(jsonify(json_data))
-    the_response.status_code = 200
-    the_response.mimetype = 'application/json'
-    return the_response
-
-@admin.route('/dealer-scumminess', methods=['GET'])
-def get_avg_scumminess():
-    """
-    Get the average scumminess across all dealers.
-    """
-    QUERY = """
-        SELECT AVG(scumminess) as Avg_Scumminess FROM Dealer;
-    """
-    cursor = db.get_db().cursor()
-    cursor.execute(QUERY)
-    row_headers = [x[0] for x in cursor.description]
-    json_data = []
-    theData = cursor.fetchall()
-    for row in theData:
-        json_data.append(dict(zip(row_headers, row)))
-    the_response = make_response(jsonify(json_data))
-    the_response.status_code = 200
-    the_response.mimetype = 'application/json'
-    return the_response
-
-@admin.route('/remove-dealer', methods=['POST'])
-def remove_dealer():
+@admin.route('/fire-dealer/<dealerId>', methods=['POST'])
+def remove_dealer(dealerId):
     """
     Removes the dealer with the given dealerID (as a HTTP Request header).
     """
     cursor = db.get_db().cursor()
-    dealer_id_to_remove = request.headers["id_to_remove"]
-    query = f'DELETE FROM Dealer WHERE dealerId = {dealer_id_to_remove}'
+    query = f'DELETE FROM Dealer WHERE dealerId = {dealerId}'
     cursor.execute(query)
     db.get_db().commit()
     return "success"
