@@ -41,7 +41,7 @@ def get_employees():
     dealer stats, namely, friendliness, corruptness and scumminess.
     """
     QUERY = """
-        SELECT d.firstName, d.lastName, d.friendliness, d.corruptness, d.scumminess, A.role, A.firstName as Reports_To from Dealer d
+        SELECT d.dealerId, d.firstName, d.lastName, d.friendliness, d.corruptness, d.scumminess, A.role, A.firstName as Reports_To from Dealer d
         JOIN PokerTable PT ON d.tableId = PT.tableId
         JOIN AdminTableBridge ATB ON PT.tableId = ATB.tableId
         JOIN Admin A ON ATB.adminId = A.adminId;
