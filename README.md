@@ -1,14 +1,19 @@
-# Directions 
+# Team H-CAS: Suraj, Dilan, Conner, and Luke
 
-## Setting up backend 
+## Video
+https://youtu.be/wmSrTUvHa34
+
+## Directions 
+
+### Setting up backend 
 - ``git pull``
 - ``docker compose build``
 - ``docker compose up``
 
-## Setting up ngrok
+### Setting up ngrok
 - ngrok http 8001
 
-## Setting up appsmith
+### Setting up appsmith
 - Go to the Crooked Casino project.
 - Look at Datasources on the left sidebar. 
 - Click on casino-backend.
