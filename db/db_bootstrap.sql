@@ -1,11 +1,11 @@
 -- # -------- CREATE DATABASE ------------
-CREATE DATABASE database1;
+CREATE DATABASE casino_db;
 
--- # -------- CREATE USER ------------
-GRANT ALL PRIVILEGES ON database1.* TO 'webapp'@'%';
+-- # -------- SETUP USER ------------
+GRANT ALL PRIVILEGES ON casino_db.* TO 'webapp'@'%';
 FLUSH PRIVILEGES;
 
-USE database1;
+USE casino_db;
 
 -- # -------- CREATE TABLES ------------
 

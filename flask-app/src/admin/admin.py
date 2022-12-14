@@ -1,87 +1,46 @@
-from flask import Blueprint, request, jsonify, make_response, current_app
-import json
+from flask import Blueprint
 from src import db
+from utils import executeQuery
 
-
+# Blueprint for the admin pages.
 admin = Blueprint('admin', __name__)
 
-# Admin page
+# Returns the profits at every table in the casino.
 @admin.route('/profits', methods=['GET'])
 def get_profits():
-    cursor = db.get_db().cursor()
-    cursor.execute(f'SELECT tableId, SUM(winLossAmt) as profit FROM PokerTable NATURAL JOIN TableHistory GROUP BY tableId ORDER BY tableId;')
-    row_headers = [x[0] for x in cursor.description]
-    json_data = []
-    theData = cursor.fetchall()
-    for row in theData:
-        json_data.append(dict(zip(row_headers, row)))
-    the_response = make_response(jsonify(json_data))
-    the_response.status_code = 200
-    the_response.mimetype = 'application/json'
-    return the_response
+    response = executeQuery(f'''SELECT tableId, SUM(winLossAmt) as profit 
+                            FROM PokerTable NATURAL JOIN TableHistory 
+                            GROUP BY tableId ORDER BY tableId;''')
+    return response
 
+# Returns data used to populate a chart of tables and their respective profits.
 @admin.route('/chart', methods=['GET'])
 def get_chart():
-    cursor = db.get_db().cursor()
-    cursor.execute(f'SELECT tableId as x, SUM(winLossAmt) as y FROM PokerTable NATURAL JOIN TableHistory GROUP BY tableId ORDER BY tableId;')
-    row_headers = [x[0] for x in cursor.description]
-    json_data = []
-    theData = cursor.fetchall()
-    for row in theData:
-        json_data.append(dict(zip(row_headers, row)))
-    the_response = make_response(jsonify(json_data))
-    the_response.status_code = 200
-    the_response.mimetype = 'application/json'
-    return the_response
+    response = executeQuery(f'''SELECT tableId as x, SUM(winLossAmt) as y FROM PokerTable 
+                            NATURAL JOIN TableHistory GROUP BY tableId ORDER BY tableId;''')
+    return response
 
 @admin.route('/employees', methods=['GET'])
 def get_employees():
-    """
-    Employee management view, where admins can see who each employee reports and their
-    dealer stats, namely, friendliness, corruptness and scumminess.
-    """
-    QUERY = """
-        SELECT A.firstName as Supervisor, A.role as Role, d.firstName, d.lastName, d.friendliness, d.corruptness, d.scumminess, dealerId from Dealer d
-        JOIN PokerTable PT ON d.tableId = PT.tableId
-        JOIN AdminTableBridge ATB ON PT.tableId = ATB.tableId
-        JOIN Admin A ON ATB.adminId = A.adminId;
-    """
-    cursor = db.get_db().cursor()
-    cursor.execute(QUERY)
-    row_headers = [x[0] for x in cursor.description]
-    json_data = []
-    theData = cursor.fetchall()
-    for row in theData:
-        json_data.append(dict(zip(row_headers, row)))
-    the_response = make_response(jsonify(json_data))
-    the_response.status_code = 200
-    the_response.mimetype = 'application/json'
-    return the_response
+    response = executeQuery("""SELECT A.firstName as Supervisor, A.role as Role, d.firstName, d.lastName, 
+                            d.friendliness, d.corruptness, d.scumminess, dealerId from Dealer d
+                            JOIN PokerTable PT ON d.tableId = PT.tableId
+                            JOIN AdminTableBridge ATB ON PT.tableId = ATB.tableId
+                            JOIN Admin A ON ATB.adminId = A.adminId;""")
+    return response
 
 @admin.route('/dealer-data', methods=['GET'])
 def get_dealer_data():
-    QUERY = """
-        SELECT AVG(scumminess) scum, AVG(corruptness) corr, AVG(friendliness) friend FROM Dealer;
-    """
-    cursor = db.get_db().cursor()
-    cursor.execute(QUERY)
-    row_headers = [x[0] for x in cursor.description]
-    json_data = []
-    theData = cursor.fetchall()
-    for row in theData:
-        json_data.append(dict(zip(row_headers, row)))
-    the_response = make_response(jsonify(json_data))
-    the_response.status_code = 200
-    the_response.mimetype = 'application/json'
-    return the_response
+    response = executeQuery("""SELECT 
+                            AVG(scumminess) scum, AVG(corruptness) corr, AVG(friendliness) friend 
+                            FROM Dealer;""")
+    return response
 
+# Removes the dealer with the given dealerID (as a HTTP Request header).   
 @admin.route('/fire-dealer/<dealerId>', methods=['POST'])
 def remove_dealer(dealerId):
-    """
-    Removes the dealer with the given dealerID (as a HTTP Request header).
-    """
     cursor = db.get_db().cursor()
     query = f'DELETE FROM Dealer WHERE dealerId = {dealerId}'
     cursor.execute(query)
     db.get_db().commit()
-    return "success"
+    return "SUCCESS"
