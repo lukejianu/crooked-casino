@@ -8,19 +8,18 @@ player = Blueprint('player', __name__)
 # Getting players to populate a dropdown.
 @player.route('/players', methods=['GET'])
 def get_players():
-    response = executeQuery('select firstName as label, playerId as value from Player')
+    response = executeQuery('SELECT firstName label, playerId value FROM Player')
     return response
 
 # Get the portfolio of the player that corresponds to the given playerId.
 @player.route('/portfolio/<playerId>', methods=['GET'])
 def get_portfolio(playerId):
-    response = executeQuery(f'''select 
+    response = executeQuery(f'''SELECT 
     total_chips_value, num_1, num_5, num_10, num_25, num_100 
-    from Player NATURAL JOIN Portfolio WHERE playerId = {playerId}
-    ''')
+    FROM Player NATURAL JOIN Portfolio WHERE playerId = {playerId}''')
     return response
 
-# Add a post 
+# Updates the portfolio of the specified player (passes the data in the header). 
 @player.route('/portfolio/<playerId>', methods=['POST'])
 def update_portfolio(playerId):
     cursor = db.get_db().cursor()
@@ -40,4 +39,4 @@ def update_portfolio(playerId):
                     total_chips_value = num_1 + num_5 * 5 + num_10 * 10 + num_25 * 25 + num_100 * 100 
                     WHERE playerId = {playerId};''')
     db.get_db().commit()
-    return "success"
+    return "SUCCESS"

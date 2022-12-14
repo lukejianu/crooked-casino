@@ -20,15 +20,17 @@ def get_chart():
                             NATURAL JOIN TableHistory GROUP BY tableId ORDER BY tableId;''')
     return response
 
+# Returns information about all employees (dealers).
 @admin.route('/employees', methods=['GET'])
 def get_employees():
-    response = executeQuery("""SELECT A.firstName as Supervisor, A.role as Role, d.firstName, d.lastName, 
+    response = executeQuery("""SELECT A.firstName Supervisor, A.role Role, d.firstName, d.lastName, 
                             d.friendliness, d.corruptness, d.scumminess, dealerId from Dealer d
                             JOIN PokerTable PT ON d.tableId = PT.tableId
                             JOIN AdminTableBridge ATB ON PT.tableId = ATB.tableId
                             JOIN Admin A ON ATB.adminId = A.adminId;""")
     return response
 
+# Returns average data about all the dealers in the database.
 @admin.route('/dealer-data', methods=['GET'])
 def get_dealer_data():
     response = executeQuery("""SELECT 
@@ -36,7 +38,7 @@ def get_dealer_data():
                             FROM Dealer;""")
     return response
 
-# Removes the dealer with the given dealerID (as a HTTP Request header).   
+# Removes the dealer with the given dealerID.
 @admin.route('/fire-dealer/<dealerId>', methods=['POST'])
 def remove_dealer(dealerId):
     cursor = db.get_db().cursor()
